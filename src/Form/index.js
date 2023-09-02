@@ -1,48 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Box, Typography } from "@mui/material";
-import { LogoSpace, FormSpace, Img } from "./styles";
-import DatosUsuario from "./DatosUsuario";
-import DatosPersonales from "./DatosPersonales";
-import DatosEntrega from "./DatosEntrega";
-import Complete from "./Complete";
-import Stepper from "../Stepper";
-import Step from "./Step";
+import { LogoSpace, MainSpace, FormSpace, Img } from "./styles";
 
-//Validaciones
-import { validarEmail, validarPassword } from "./DatosUsuario/validaciones";
+import Stepper from "../Stepper";
+import { useState } from "react";
+import StepDatos from "./Step";
 import {
   validarNombre,
   validarApellidos,
   validarTelefono,
 } from "./DatosPersonales/validaciones";
-import { validarInput } from "./DatosEntrega/validaciones";
+import { validarEmail, validarPassword } from "./DatosUsuario/validaciones";
+import {
+  validarDireccion,
+  validarCiudad,
+  validarEstado,
+} from "./DatosEntrega/validaciones";
+import swal from "sweetalert";
 
 const Form = () => {
-  const [step, setStep] = useState(0);
-  const [pasos, setPasos] = useState({});
-
-  const onSubmit = (e, step, pasos) => {
-    console.log(step);
-    e.preventDefault();
-    let newStep = step + 1;
-    console.log(newStep);
-    setStep(newStep);
-    if (newStep === 3) {
-      console.log("Eviar datos al backend", pasos);
+  const getLocalStorageLastStep = () => {
+    if (!window.localStorage.getItem("pasos")) {
+      return 0;
+    } else {
+      const arrayData = JSON.parse(window.localStorage.getItem("pasos"));
+      const lastIndex = arrayData.length - 1;
+      return lastIndex + 1;
     }
   };
 
-  const handleChange = (element, position, currentStep, validator, pasos) => {
-    const value = element.target.value;
-    const valid = validator(value);
-    const cp = { ...pasos };
-    cp[currentStep].inputs[position].value = value;
-    cp[currentStep].inputs[position].valid = valid;
-
-    setPasos(cp);
-  };
-
-  const stepsFlow = {
+  const [step, setStep] = useState(getLocalStorageLastStep());
+  const [pasos, setPasos] = useState({
     0: {
       inputs: [
         {
@@ -50,33 +38,18 @@ const Form = () => {
           type: "email",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa un correo electrónico válido.",
+          helperText: "Ingresa un correo electrónico válido",
           validator: validarEmail,
         },
         {
-          label: "Contraseña",
-          type: "password",
+          label: "Password",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText:
-            "Ingresa una contraseña válida, Al menos 8 caracteres y máximo 20.",
-          validator: validarPassword,
-        },
-        {
-          label: "Cuenta de github",
-          type: "text",
-          value: "",
-          valid: null,
-          onChange: handleChange,
-          helperText:
-            "Ingresa una contraseña válida, Al menos 8 caracteres y máximo 20.",
+          helperText: "Ingresa una password entre 8 y 20 caracteres",
           validator: validarPassword,
         },
       ],
       buttonText: "Siguiente",
-      onSubmit,
     },
     1: {
       inputs: [
@@ -85,8 +58,7 @@ const Form = () => {
           type: "text",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa al menos 2 caracteres y máximo 30 caracteres.",
+          helperText: "Ingresa un nombre entre 3 y 15 caracteres",
           validator: validarNombre,
         },
         {
@@ -94,86 +66,103 @@ const Form = () => {
           type: "text",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa al menos 2 caracteres y máximo 50 caracteres.",
+          helperText: "Ingresa apellidos entre 10 y 30 caracteres",
           validator: validarApellidos,
         },
         {
-          label: "Número telefonico",
+          label: "Número telefónico",
           type: "number",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa al menos 8 digitos y máximo 14 digitos.",
+          helperText: "Ingresa un teléfono entre 9 y 14 caracteres",
           validator: validarTelefono,
         },
       ],
       buttonText: "Siguiente",
-      onSubmit,
     },
     2: {
       inputs: [
         {
-          label: "Direccion",
+          label: "Dirección",
           type: "text",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa al menos 4 caracteres.",
-          validator: validarInput,
+          helperText: "Ingresa una dirección mayor o igual a 3 caracteres",
+          validator: validarDireccion,
         },
         {
           label: "Ciudad",
           type: "text",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa al menos 4 caracteres.",
-          validator: validarInput,
+          helperText: "Ingresa una ciudad mayor o igual a 5 caracteres",
+          validator: validarCiudad,
         },
         {
           label: "Estado/Provincia",
           type: "text",
           value: "",
           valid: null,
-          onChange: handleChange,
-          helperText: "Ingresa al menos 4 caracteres.",
-          validator: validarInput,
+          helperText: "Ingresa un estado mayor o igual a 5 caracteres",
+          validator: validarEstado,
         },
       ],
       buttonText: "Crear cuenta",
-      onSubmit,
     },
+  });
+
+  const onChange = (e, index, step, validator) => {
+    const value = e.target.value;
+    const valid = validator(value);
+
+    setPasos({
+      ...pasos,
+      [step]: {
+        ...pasos[step],
+        inputs: pasos[step].inputs.map((objeto, indexarray) => {
+          if (indexarray === index) {
+            return {
+              ...pasos[step].inputs[index],
+              value: value,
+              valid: valid,
+            };
+          } else {
+            return objeto;
+          }
+        }),
+      },
+    });
   };
 
-  useEffect(() => {
-    setPasos(stepsFlow);
-  }, []);
-
-  // useEffect(async () => {
-  //   try {
-  //     const data = await fetch("https://jsonplaceholder.typicode.com/posts");
-  //     const posts = await data.json();
-  //     console.log(posts);
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // });
-
-  //step = 0 --> <DatosUsuario />
-  //step = 1 --> <DatosPersonales />
-  //step = 2 --> <DatosEntrega />
-  //step = 3 --> <Complete />
-
-  const updateStep = (step) => {
-    setStep(step);
+  const setLocalStorage = (objetoPasosCompletados) => {
+    if (!window.localStorage.getItem("pasos")) {
+      window.localStorage.setItem(
+        "pasos",
+        JSON.stringify([objetoPasosCompletados])
+      );
+    } else {
+      const arrayObjetosPasos = JSON.parse(
+        window.localStorage.getItem("pasos")
+      );
+      arrayObjetosPasos.push(objetoPasosCompletados);
+      window.localStorage.setItem("pasos", JSON.stringify(arrayObjetosPasos));
+    }
   };
 
-  const steps = {
-    0: <DatosUsuario updateStep={updateStep} />,
-    1: <DatosPersonales updateStep={updateStep} />,
-    2: <DatosEntrega updateStep={updateStep} />,
-    3: <Complete />,
+  const onSubmit = (e, step) => {
+    e.preventDefault();
+    const checkAllValidity = pasos[step].inputs
+      .map((objeto) => objeto.valid)
+      .every((elemento) => elemento === true);
+
+    if (checkAllValidity) {
+      setLocalStorage({
+        [step]: pasos[step].inputs.map((objeto) => objeto.value),
+      });
+      setStep(step + 1);
+    } else {
+      swal("¡ Advertencia !", "Te falta completar uno o más campos", "warning");
+    }
   };
 
   return (
@@ -189,12 +178,14 @@ const Form = () => {
         <Typography variant="h3">AluraFood</Typography>
       </LogoSpace>
       <FormSpace>
-        {step < 3 && <Stepper step={step} />}
-        {/* {steps[step]} */}
-        {step < 3 && pasos[step] && (
-          <Step data={pasos[step]} step={step} pasos={pasos} />
-        )}
-        {step === 3 && <Complete />}
+        <Stepper step={step} />
+        {/*selectStep(step)*/}
+        <StepDatos
+          data={pasos[step]}
+          step={step}
+          onChange={onChange}
+          onSubmit={onSubmit}
+        />
       </FormSpace>
     </Box>
   );

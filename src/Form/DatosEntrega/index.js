@@ -1,14 +1,28 @@
 import React, { useState } from "react";
 import { TextField, Button, Box } from "@mui/material";
-import { validarInput } from "./validaciones";
+import { validarEstado, validarCiudad, validarDireccion } from "./validaciones";
 
 const DatosEntrega = ({ updateStep }) => {
-  const [address, setAddress] = useState({ value: "", valid: null });
-  const [city, setCity] = useState({ value: "", valid: null });
-  const [province, setProvince] = useState({ value: "", valid: null });
+  const [estado, setEstado] = useState({
+    direccion: { value: "", valid: true },
+    ciudad: { value: "", valid: true },
+    estado: { value: "", valid: true },
+  });
 
   return (
     <Box
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (
+          validarDireccion(estado.direccion.value) &&
+          validarCiudad(estado.ciudad.value) &&
+          validarEstado(estado.estado.value)
+        ) {
+          updateStep(3);
+        } else {
+          console.log("error de formulario 2: Entrega");
+        }
+      }}
       component="form"
       autocomplete="off"
       sx={{
@@ -16,11 +30,7 @@ const DatosEntrega = ({ updateStep }) => {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
-      }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        updateStep(3);
-        console.log(address, city, province);
+        paddingTop: "2rem",
       }}
     >
       <TextField
@@ -29,14 +39,28 @@ const DatosEntrega = ({ updateStep }) => {
         fullWidth
         margin="dense"
         type="text"
-        value={address.value}
-        onChange={(input) => {
-          const value = input.target.value;
-          const valid = validarInput(value);
-          setAddress({ value, valid });
+        value={estado.direccion.value}
+        onChange={(e) => {
+          const valueDireccion = e.target.value;
+          const valid = validarDireccion(valueDireccion);
+          setEstado({
+            ...estado,
+            direccion: { value: valueDireccion, valid: valid },
+          });
         }}
-        error={address.valid === false}
-        helperText={address.valid === false && "Ingresa al menos 4 caracteres."}
+        onBlur={(e) => {
+          const valueDireccion = e.target.value;
+          const valid = validarDireccion(valueDireccion);
+          setEstado({
+            ...estado,
+            direccion: { value: valueDireccion, valid: valid },
+          });
+        }}
+        error={!estado.direccion.valid}
+        helperText={
+          !estado.direccion.valid &&
+          "Ingresa una dirección mayor o igual a 3 caracteres"
+        }
       />
       <TextField
         label="Ciudad"
@@ -44,14 +68,28 @@ const DatosEntrega = ({ updateStep }) => {
         fullWidth
         margin="dense"
         type="text"
-        value={city.value}
-        onChange={(input) => {
-          const value = input.target.value;
-          const valid = validarInput(value);
-          setCity({ value, valid });
+        value={estado.ciudad.value}
+        onChange={(e) => {
+          const valueCiudad = e.target.value;
+          const valid = validarCiudad(valueCiudad);
+          setEstado({
+            ...estado,
+            ciudad: { value: valueCiudad, valid: valid },
+          });
         }}
-        error={city.valid === false}
-        helperText={city.valid === false && "Ingresa al menos 4 caracteres."}
+        onBlur={(e) => {
+          const valueCiudad = e.target.value;
+          const valid = validarCiudad(valueCiudad);
+          setEstado({
+            ...estado,
+            ciudad: { value: valueCiudad, valid: valid },
+          });
+        }}
+        error={!estado.ciudad.valid}
+        helperText={
+          !estado.ciudad.valid &&
+          "Ingresa una ciudad mayor o igual a 5 caracteres"
+        }
       />
       <TextField
         label="Estado/Provincia"
@@ -59,15 +97,27 @@ const DatosEntrega = ({ updateStep }) => {
         fullWidth
         margin="dense"
         type="text"
-        value={province.value}
-        onChange={(input) => {
-          const value = input.target.value;
-          const valid = validarInput(value);
-          setProvince({ value, valid });
+        value={estado.estado.value}
+        onChange={(e) => {
+          const valueEstado = e.target.value;
+          const valid = validarEstado(valueEstado);
+          setEstado({
+            ...estado,
+            estado: { value: valueEstado, valid: valid },
+          });
         }}
-        error={province.valid === false}
+        onBlur={(e) => {
+          const valueEstado = e.target.value;
+          const valid = validarEstado(valueEstado);
+          setEstado({
+            ...estado,
+            estado: { value: valueEstado, valid: valid },
+          });
+        }}
+        error={!estado.estado.valid}
         helperText={
-          province.valid === false && "Ingresa al menos 4 caracteres."
+          !estado.estado.valid &&
+          "Ingresa un estado mayor o igual a 5 caracteres"
         }
       />
       <Button variant="contained" type="submit">

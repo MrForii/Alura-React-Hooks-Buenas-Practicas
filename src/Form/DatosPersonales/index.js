@@ -1,18 +1,33 @@
-import React, { useState } from "react";
+import React from "react";
 import { TextField, Button, Box } from "@mui/material";
 import {
-  validarNombre,
   validarApellidos,
+  validarNombre,
   validarTelefono,
 } from "./validaciones";
+import { useState } from "react";
 
 const DatosPersonales = ({ updateStep }) => {
-  const [name, setName] = useState({ value: "", valid: null });
-  const [lastName, setLastName] = useState({ value: "", valid: null });
-  const [phone, setPhone] = useState({ value: "", valid: null });
+  const [estado, setEstado] = useState({
+    nombre: { value: "", valid: true },
+    apellidos: { value: "", valid: true },
+    telefono: { value: "", valid: true },
+  });
 
   return (
     <Box
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (
+          validarNombre(estado.nombre.value) &&
+          validarApellidos(estado.apellidos.value) &&
+          validarTelefono(estado.telefono.value)
+        ) {
+          updateStep(2);
+        } else {
+          console.log("error de formulario 1: Personales");
+        }
+      }}
       component="form"
       autocomplete="off"
       sx={{
@@ -20,10 +35,7 @@ const DatosPersonales = ({ updateStep }) => {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
-      }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        updateStep(2);
+        paddingTop: "2rem",
       }}
     >
       <TextField
@@ -32,17 +44,20 @@ const DatosPersonales = ({ updateStep }) => {
         fullWidth
         margin="dense"
         type="text"
-        value={name.value}
-        onChange={(input) => {
-          const value = input.target.value;
-          const valid = validarNombre(value);
-          setName({ value, valid });
-          console.log(value, valid);
+        value={estado.nombre.value}
+        onChange={(e) => {
+          const valueName = e.target.value;
+          const valid = validarNombre(valueName);
+          setEstado({ ...estado, nombre: { value: valueName, valid: valid } });
         }}
-        error={name.valid === false}
+        onBlur={(e) => {
+          const valueName = e.target.value;
+          const valid = validarNombre(valueName);
+          setEstado({ ...estado, nombre: { value: valueName, valid: valid } });
+        }}
+        error={!estado.nombre.valid}
         helperText={
-          name.valid === false &&
-          "Ingresa al menos 2 caracteres y máximo 30 caracteres."
+          !estado.nombre.valid && "Ingresa un nombre entre 3 y 15 caracteres"
         }
       />
       <TextField
@@ -51,17 +66,27 @@ const DatosPersonales = ({ updateStep }) => {
         fullWidth
         margin="dense"
         type="text"
-        value={lastName.value}
-        onChange={(input) => {
-          const value = input.target.value;
-          const valid = validarApellidos(value);
-          setLastName({ value, valid });
-          console.log(value, valid);
+        value={estado.apellidos.value}
+        onChange={(e) => {
+          const valueApellidos = e.target.value;
+          const valid = validarApellidos(valueApellidos);
+          setEstado({
+            ...estado,
+            apellidos: { value: valueApellidos, valid: valid },
+          });
         }}
-        error={lastName.valid === false}
+        onBlur={(e) => {
+          const valueApellidos = e.target.value;
+          const valid = validarApellidos(valueApellidos);
+          setEstado({
+            ...estado,
+            apellidos: { value: valueApellidos, valid: valid },
+          });
+        }}
+        error={!estado.apellidos.valid}
         helperText={
-          lastName.valid === false &&
-          "Ingresa al menos 2 caracteres y máximo 50 caracteres."
+          !estado.apellidos.valid &&
+          "Ingresa apellidos entre 10 y 30 caracteres"
         }
       />
       <TextField
@@ -71,17 +96,27 @@ const DatosPersonales = ({ updateStep }) => {
         margin="dense"
         type="number"
         inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-        value={phone.value}
-        onChange={(input) => {
-          const value = input.target.value;
-          const valid = validarTelefono(value);
-          setPhone({ value, valid });
-          console.log(value, valid);
+        value={estado.telefono.value}
+        onChange={(e) => {
+          const valueTelefono = e.target.value;
+          const valid = validarTelefono(valueTelefono);
+          setEstado({
+            ...estado,
+            telefono: { value: valueTelefono, valid: valid },
+          });
         }}
-        error={phone.valid === false}
+        onBlur={(e) => {
+          const valueTelefono = e.target.value;
+          const valid = validarTelefono(valueTelefono);
+          setEstado({
+            ...estado,
+            telefono: { value: valueTelefono, valid: valid },
+          });
+        }}
+        error={!estado.telefono.valid}
         helperText={
-          phone.valid === false &&
-          "Ingresa al menos 8 digitos y máximo 14 digitos."
+          !estado.telefono.valid &&
+          "Ingresa un teléfono entre 9 y 14 caracteres"
         }
       />
       <Button variant="contained" type="submit">

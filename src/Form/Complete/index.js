@@ -16,7 +16,9 @@ const Complete = () => {
         flexDirection: "column",
       }}
     >
-      <Typography variant="h4">!Gracias por tu registro¡</Typography>
+      <Box textAlign="center">
+        <Typography variant="h4">¡ Gracias por tu registro !</Typography>
+      </Box>
       <Img src="/complete.png" />
     </Box>
   );

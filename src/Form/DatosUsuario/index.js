@@ -1,74 +1,143 @@
-import React, { useState } from "react";
+import React from "react";
 import { TextField, Button, Box } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import FormControl from "@mui/material/FormControl";
+import { useState } from "react";
 import { validarEmail, validarPassword } from "./validaciones";
+import FormHelperText from "@mui/material/FormHelperText";
 
-const DatosUsuario = ({ updateStep }) => {
-  const [email, setEmail] = useState({
-    value: "",
-    valid: null,
-  });
-  const [password, setPassword] = useState({ value: "", valid: null });
+const DatosUsuario = ({ updateStep, data, onChange, onSubmit }) => {
+  const [showPassword, setShowPassword] = useState(false);
 
-  return (
-    <Box
-      component="form"
-      autocomplete="off"
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-      }}
-      onSubmit={(e) => {
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+  if (!data) {
+    return <></>;
+  } else {
+    const { inputs, buttonText } = data;
+
+    return (
+      <Box
+        component="form"
+        autocomplete="off"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          paddingTop: "2rem",
+        }}
+        onSubmit={
+          (e) => onSubmit(e, 0)
+          /*(e) => {
+        
         e.preventDefault();
-        if (email.valid && password.valid) {
-          console.log("Siguiente formulario");
-          console.log(email, password);
+        if (
+          validarEmail(estado.email.value) &&
+          validarPassword(estado.password.value)
+        ) {
           updateStep(1);
         } else {
-          console.log("No hacer nada");
+          console.log("error de formulario 0: Datos Usuario");
+        }}*/
         }
-      }}
-    >
-      <TextField
-        label="Correo electrónico"
-        variant="outlined"
-        fullWidth
-        margin="dense"
-        type="email"
-        error={email.valid === false}
-        helperText={
-          email.valid === false && "Ingresa un correo electrónico válido."
+      >
+        <TextField
+          label={inputs[0].label}
+          variant="outlined"
+          error={inputs[0].valid === false}
+          fullWidth
+          margin="dense"
+          type={inputs[0].type}
+          helperText={inputs[0].valid === false && inputs[0].helperText}
+          value={inputs[0].value}
+          onChange={
+            (e) => onChange(e, 0, 0, inputs[0].validator)
+
+            /*
+          (e) => {
+          const emailValue = e.target.value;
+          const valid = validarEmail(emailValue);
+          setEstado({
+            ...estado,
+            email: { value: emailValue, valid },
+          });
         }
-        value={email.value}
-        onChange={(input) => {
-          const email = input.target.value;
-          const valido = validarEmail(email);
-          setEmail({ value: email, valid: valido });
-        }}
-      />
-      <TextField
-        label="Contraseña"
-        variant="outlined"
-        fullWidth
-        margin="dense"
-        type="password"
-        error={password.valid === false}
-        helperText={
-          password.valid === false &&
-          "Ingresa una contraseña válida, Al menos 8 caracteres y máximo 20."
-        }
-        value={password.value}
-        onChange={(input) => {
-          const password = input.target.value;
-          setPassword({ value: password, valid: validarPassword(password) });
-        }}
-      />
-      <Button variant="contained" type="submit">
-        Siguiente
-      </Button>
-    </Box>
-  );
+        */
+          }
+          onBlur={
+            (e) => onChange(e, 0, 0, inputs[0].validator)
+            /*
+          (e) => {
+          const emailValue = e.target.value;
+          const valid = validarEmail(emailValue);
+          setEstado({
+            ...estado,
+            email: { value: emailValue, valid },
+          });
+        }*/
+          }
+        />
+
+        <FormControl sx={{ m: 1, width: "100%" }} variant="outlined">
+          <InputLabel
+            error={inputs[1].valid === false}
+            htmlFor="outlined-adornment-password"
+          >
+            {inputs[1].label}
+          </InputLabel>
+          <OutlinedInput
+            error={inputs[1].valid === false}
+            value={inputs[1].value}
+            onChange={
+              (e) => onChange(e, 1, 0, inputs[1].validator)
+              /*
+            (e) => {
+            const passwordValue = e.target.value;
+            const valid = validarPassword(passwordValue);
+            setEstado({
+              ...estado,
+              password: { value: passwordValue, valid },
+            });
+          }
+          */
+            }
+            onBlur={(e) => onChange(e, 1, 0, inputs[1].validator)}
+            id="outlined-adornment-password"
+            type={showPassword ? "text" : "password"}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Password"
+          />
+          <FormHelperText error={inputs[1].valid === false}>
+            {inputs[1].valid === false ? inputs[1].helperText : ""}
+          </FormHelperText>
+        </FormControl>
+        <Button variant="contained" type="submit">
+          {buttonText}
+        </Button>
+      </Box>
+    );
+  }
 };
 
 export default DatosUsuario;
